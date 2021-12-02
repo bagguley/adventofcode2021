@@ -1,20 +1,26 @@
 package day2
 
 fun main() {
-    println(calc(testData))
-    println(calc(data))
+    println(Part2.calc(testData))
+    println(Part2.calc(data))
 }
 
-fun calc(data: List<String>): Int {
-    return data.map{toVector(it)}.reduce{a, b -> Pair(a.first + b.first, a.second + b.second)}.let { a -> a.first * a.second }
-}
-
-fun toVector(str: String) : Pair<Int, Int> {
-    val arr = str.split(" ")
-    return when(arr[0]) {
-        "forward" -> Pair(arr[1].toInt(), 0)
-        "down" -> Pair(0, arr[1].toInt())
-        "up" -> Pair(0, -arr[1].toInt())
-        else -> {throw IllegalStateException("Help")}
+object Part2 {
+    fun calc(data: List<String>): Int {
+        var xPos = 0
+        var aim = 0
+        var depth = 0
+        data.forEach {
+            val arr = it.split(" ")
+            when (arr[0]) {
+                "forward" -> {xPos += arr[1].toInt(); depth += aim * arr[1].toInt() }
+                "down" -> aim += arr[1].toInt()
+                "up" -> aim -= arr[1].toInt()
+                else -> {
+                    throw IllegalStateException("Help")
+                }
+            }
+        }
+        return xPos * depth
     }
 }
