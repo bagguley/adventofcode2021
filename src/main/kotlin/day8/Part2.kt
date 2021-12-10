@@ -16,11 +16,11 @@ object Part2 {
 
     private fun calcDigits(digits: List<List<Char>>): MutableMap<Int, List<Char>> {
         val map = calcMap(digits)
-        map[9] = digits.find { it.size == 6 && it.containsAll(map[4]!!) }!!  // Y
-        map[2] = digits.find { it.size == 5 && !map[9]!!.containsAll(it) }!! // Y
-        map[3] = digits.find { it.size == 5 && map[9]!!.containsAll(it) && it.containsAll(map[7]!!) }!! // Y
-        map[5] = digits.find { it.size == 5 && it != map[2]!! && it != map[3]!! }!! // Y
-        map[6] = digits.find { it.size == 6 && it.containsAll(map[5]!!) && it != map[9]}!! //
+        map[9] = digits.find { it.size == 6 && it.containsAll(map[4]!!) }!!
+        map[2] = digits.find { it.size == 5 && !map[9]!!.containsAll(it) }!!
+        map[3] = digits.find { it.size == 5 && map[9]!!.containsAll(it) && it.containsAll(map[7]!!) }!!
+        map[5] = digits.find { it.size == 5 && it != map[2]!! && it != map[3]!! }!!
+        map[6] = digits.find { it.size == 6 && it.containsAll(map[5]!!) && it != map[9]}!!
         map[0] = digits.find { !map.values.contains(it) }!!
         return map
     }
