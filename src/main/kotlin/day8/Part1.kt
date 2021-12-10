@@ -3,6 +3,8 @@ package day8
 fun main() {
     println(Part1.calc(testData))
     println(Part1.calc(data))
+
+    println(data.map{it.split(" | ").let{s->s[0].split(" ") to s[1].split(" ")}}.flatMap{it.second.filter{s->s.length in listOf(2,3,4,7)}}.count())
 }
 
 object Part1 {
