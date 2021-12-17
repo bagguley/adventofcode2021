@@ -105,11 +105,16 @@ class Bits(private val data: String) {
 
 abstract class Packet(val version: Int) {
     abstract fun sumVersions(): Int
+    abstract fun calcValue(): Long
 }
 
 class Literal(version: Int, val type: Int, val value: Long) : Packet(version) {
     override fun sumVersions(): Int {
         return version
+    }
+
+    override fun calcValue(): Long {
+        return value
     }
 }
 
@@ -122,5 +127,18 @@ class Operator(version: Int, val type: Int, val lengthType: Int, val subLength: 
 
     override fun sumVersions(): Int {
         return version + subPackets.sumOf { it.sumVersions() }
+    }
+
+    override fun calcValue(): Long {
+        when (type) {
+            0 -> return subPackets.sumOf { it.calcValue() }
+            1 -> return subPackets.map { it.calcValue() }.reduce{a,b -> a * b}
+            2 -> return subPackets.minOf { it.calcValue() }
+            3 -> return subPackets.maxOf { it.calcValue() }
+            5 -> return if (subPackets[0].calcValue() > subPackets[1].calcValue()) 1 else 0
+            6 -> return if (subPackets[0].calcValue() < subPackets[1].calcValue()) 1 else 0
+            7 -> return if (subPackets[0].calcValue() == subPackets[1].calcValue()) 1 else 0
+        }
+        throw Exception("Error, bad type")
     }
 }
