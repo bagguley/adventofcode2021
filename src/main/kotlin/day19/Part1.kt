@@ -2,29 +2,21 @@ package day19
 
 fun main() {
     println(Part1.calc(testData))
-    println(Part1.calc2(testData))
     println(Part1.calc(data))
-    println(Part1.calc2(data))
 }
 
 object Part1 {
     fun calc(data: List<String>): Int {
         val ocean = Ocean(data)
 
-        return ocean.countMatches()
-    }
-
-    fun calc2(data: List<String>): Int {
-        val ocean = Ocean(data)
-
-        return ocean.blah()
+        return ocean.calcNumberOfBeacons()
     }
 }
 
 class Ocean(data: List<String>) {
     private val scanners: List<Scanner>  = data.mapIndexed{i,s -> Scanner(i,s)}
 
-    fun blah(): Int {
+    fun calcNumberOfBeacons(): Int {
         var current = scanners.first()
         var remaining = scanners.minus(current)
 
