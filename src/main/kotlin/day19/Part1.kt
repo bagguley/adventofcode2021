@@ -1,5 +1,7 @@
 package day19
 
+import kotlin.math.abs
+
 fun main() {
     println(Part1.calc(testData))
     println(Part1.calc(data))
@@ -15,6 +17,7 @@ object Part1 {
 
 class Ocean(data: List<String>) {
     private val scanners: List<Scanner>  = data.mapIndexed{i,s -> Scanner(i,s)}
+    private val translatedScannerCoordinates: MutableList<Scanner> = mutableListOf()
 
     fun calcNumberOfBeacons(): Int {
         var current = scanners.first()
@@ -31,18 +34,30 @@ class Ocean(data: List<String>) {
         return current.coordinates.size
     }
 
-    fun countMatches(): Int {
-        var count = 0
-        for (i in 0 until scanners.size-1) {
-            for (j in i+1 until scanners.size) {
-                if (scanners[i].matches(scanners[j])) count++
-            }
+    fun calcManhattanDistance(): Int {
+        var current = scanners.first()
+        var remaining = scanners.minus(current)
+
+        translatedScannerCoordinates.add(current)
+
+        while (remaining.isNotEmpty()) {
+            val matching = current.findMatches(remaining)
+            translatedScannerCoordinates.addAll(matching)
+            val matchingIds = matching.map { it.id }
+            val summed = current.coordinates + matching.flatMap{it.coordinates}
+            remaining = remaining.filter { !matchingIds.contains(it.id) }
+            current = Scanner(current.id, summed)
         }
-        return count
+
+        return translatedScannerCoordinates.flatMap { s1 ->
+            translatedScannerCoordinates.map { s2 ->
+                s1.scannerCoordinate.distance(s2.scannerCoordinate)
+            }
+        }.maxOf{it}
     }
 }
 
-class Scanner constructor(val id: Int, val coordinates: Set<Coordinate>) {
+class Scanner constructor(val id: Int, val coordinates: Set<Coordinate>, val scannerCoordinate: Coordinate = Coordinate(0,0,0)) {
 
     constructor(id: Int, data: String) : this(id, data.split("\n").drop(1)
                 .map { s -> s.split(",").map { it.toInt() }}.map { Coordinate(it[0], it[1], it[2]) }.toSet())
@@ -61,9 +76,9 @@ class Scanner constructor(val id: Int, val coordinates: Set<Coordinate>) {
 
         for (myRef in coordinates) {
             for (rotated in rotations) {
-                val x = maxMatches2(myRef, rotated.coordinates)
-                if (x != null) {
-                    if (x.size >= 12) return Scanner(other.id, x)
+                val matchingScannerTranslatedRotated = maxMatches2(myRef, rotated)
+                if (matchingScannerTranslatedRotated != null) {
+                    return matchingScannerTranslatedRotated
                 }
             }
         }
@@ -96,12 +111,12 @@ class Scanner constructor(val id: Int, val coordinates: Set<Coordinate>) {
         }
     }
 
-    private fun maxMatches2(reference: Coordinate, otherCoordinates: Set<Coordinate>): Set<Coordinate>? {
-        otherCoordinates.forEach{ other ->
+    private fun maxMatches2(reference: Coordinate, otherScanner: Scanner): Scanner? {
+        otherScanner.coordinates.forEach{ other ->
             val translation = reference.minus(other)
-            val otherTranslated = otherCoordinates.map { it.add(translation) }.toSet()
+            val otherTranslated = otherScanner.coordinates.map { it.add(translation) }.toSet()
             val inter = coordinates.intersect(otherTranslated)
-            if (inter.size >= 12) return otherTranslated
+            if (inter.size >= 12) return Scanner(otherScanner.id, otherTranslated, translation)
         }
         return null
     }
@@ -217,6 +232,10 @@ class Coordinate(val x: Int, val y: Int, val z: Int) {
 
     fun add(ref: Coordinate): Coordinate {
         return Coordinate(x + ref.x, y + ref.y, z + ref.z)
+    }
+
+    fun distance(ref: Coordinate): Int {
+        return abs(x - ref.x) + abs(y - ref.y) + abs(z - ref.z)
     }
 
     override fun equals(other: Any?): Boolean {
